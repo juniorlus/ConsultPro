@@ -1,13 +1,13 @@
 :root {
-  --primary-color: #3b82f6; /* Brighter blue for dark mode */
-  --primary-hover: #60a5fa;
+  --primary-color: #0f172a; /* Deep Navy for Dark Mode */
+  --primary-hover: #1e293b;
   --secondary-color: #1e293b;
   --accent-color: #34d399;
   --accent-light: rgba(52, 211, 153, 0.1);
   --text-color: #f8fafc;
   --text-muted: #94a3b8;
-  --bg-color: #0f172a;
-  --card-bg: #1e293b;
+  --bg-color: #020617; /* Very dark background */
+  --card-bg: #0f172a; /* Card background matching primary */
   --border-color: #334155;
   --chart-grid: #334155;
   --chart-text: #94a3b8;

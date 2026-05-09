@@ -31,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="app-layout">
       <aside className="sidebar" style={{ width: '140px' }}>
-        <div className="sidebar-logo" style={{ width: '110px', height: '110px', overflow: 'hidden', padding: '12px', background: 'white', boxShadow: '0 8px 16px rgba(0,0,0,0.15)' }}>
+        <div className="sidebar-logo" style={{ width: '110px', height: '110px', overflow: 'hidden', padding: '12px' }}>
           <img src={logoImg} alt="ConsultPro Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
 
