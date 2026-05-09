@@ -53,7 +53,7 @@ const Login: React.FC = () => {
           </div>
         </div>
         
-        <h1 className="auth-title">Bem-vinda de volta</h1>
+        <h1 className="auth-title">Bem-vindo(a) de volta</h1>
         <p className="auth-subtitle">Acesse seu painel de nutrição</p>
 
         {error && <div className="error-message">{error}</div>}
