@@ -47,9 +47,9 @@ const Login: React.FC = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="logo" style={{ marginBottom: '40px' }}>
-          <div style={{ width: '250px', height: '250px', overflow: 'hidden' }}>
-            <img src={logoImg} alt="ConsultPro Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <div className="logo" style={{ marginBottom: '40px', justifyContent: 'center' }}>
+          <div style={{ width: '280px', height: '280px', overflow: 'hidden' }}>
+            <img src={logoImg} alt="ConsultPro - Nutrição e Esportes" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         </div>
         

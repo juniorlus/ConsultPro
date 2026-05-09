@@ -71,8 +71,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="main-content">
         <header className="content-header" style={{ height: '220px', padding: '0 40px' }}>
           <div className="header-left" style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ height: '160px', width: 'auto', overflow: 'hidden' }}>
-              <img src={logoImg} alt="ConsultPro" style={{ height: '100%', objectFit: 'contain' }} />
+            <div style={{ height: '180px', width: 'auto', overflow: 'hidden' }}>
+              <img src={logoImg} alt="ConsultPro - Nutrição e Esportes" style={{ height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
 
