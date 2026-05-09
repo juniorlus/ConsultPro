@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 
 const Register: React.FC = () => {
   const [nome, setNome] = useState('');
@@ -67,8 +68,10 @@ const Register: React.FC = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <div className="logo">
-          ConsultPro<span>+</span>
+        <div className="logo" style={{ marginBottom: '32px' }}>
+          <div style={{ width: '150px', height: '150px', overflow: 'hidden' }}>
+            <img src={logoImg} alt="ConsultPro Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
         </div>
         
         <h1 className="auth-title">Criar sua conta</h1>

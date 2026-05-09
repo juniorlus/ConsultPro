@@ -30,8 +30,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="app-layout">
-      <aside className="sidebar" style={{ width: '120px' }}>
-        <div className="sidebar-logo" style={{ width: '80px', height: '80px', overflow: 'hidden', padding: '10px', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+      <aside className="sidebar" style={{ width: '140px' }}>
+        <div className="sidebar-logo" style={{ width: '110px', height: '110px', overflow: 'hidden', padding: '12px', background: 'white', boxShadow: '0 8px 16px rgba(0,0,0,0.15)' }}>
           <img src={logoImg} alt="ConsultPro Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
 
@@ -69,13 +69,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </aside>
 
       <main className="main-content">
-        <header className="content-header" style={{ height: '180px' }}>
-          <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', background: 'white', padding: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
-              <img src={logoImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            </div>
-            <div className="logo" style={{ color: 'white', marginBottom: 0, fontSize: '2rem', justifyContent: 'flex-start', fontWeight: 900 }}>
-              ConsultPro
+        <header className="content-header" style={{ height: '220px', padding: '0 40px' }}>
+          <div className="header-left" style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ height: '160px', width: 'auto', overflow: 'hidden' }}>
+              <img src={logoImg} alt="ConsultPro" style={{ height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
 
