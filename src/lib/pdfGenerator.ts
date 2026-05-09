@@ -61,7 +61,7 @@ export const generateDietPlanPDF = (data: PDFData) => {
   // Meals
   let yPos = 80;
   
-  meals.forEach((meal, index) => {
+  meals.forEach((meal) => {
     // Check page break
     if (yPos > 250) {
       doc.addPage();
@@ -84,7 +84,7 @@ export const generateDietPlanPDF = (data: PDFData) => {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     
-    meal.itens.forEach(item => {
+    meal.itens.forEach((item) => {
       if (yPos > 275) {
         doc.addPage();
         yPos = 20;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Search, Eye, Edit2, Trash2, User as UserIcon, Calendar } from 'lucide-react';
+import { Plus, Search, Eye, Edit2, User as UserIcon, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface Patient {

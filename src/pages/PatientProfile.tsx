@@ -2,12 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  ArrowLeft, Save, Loader2, User, Activity, Coffee, Plus, 
-  Calendar, FileText, ChevronRight, TrendingUp, Info, Clock, Weight, FileDown
+  ArrowLeft, Save, Loader2, User, Activity, Plus, 
+  Calendar, FileText, ChevronRight, TrendingUp, Info, FileDown
 } from 'lucide-react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, AreaChart, Area,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer,
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis 
 } from 'recharts';
 import { generateDietPlanPDF } from '../lib/pdfGenerator';
@@ -97,7 +97,6 @@ const PatientProfile: React.FC = () => {
 
   const getRadarData = () => {
     const isHypertrophy = patient.objetivos?.includes('Ganhar massa');
-    const isWeightLoss = patient.objetivos?.includes('Emagrecer');
     
     // Valores ideais fictícios baseados no objetivo
     return [

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Calendar, Eye, Trash2, Edit2, User } from 'lucide-react';
+import { Plus, Calendar, Eye, Trash2, Edit2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DashboardStats {
@@ -149,7 +149,13 @@ const Dashboard: React.FC = () => {
                     <div className="action-icons" style={{ justifyContent: 'center' }}>
                       <Link to={`/pacientes/${patient.id}`} className="action-icon"><Eye size={18} /></Link>
                       <Link to={`/pacientes/edit/${patient.id}`} className="action-icon"><Edit2 size={18} /></Link>
-                      <button className="action-icon" style={{ background: 'none', padding: 0 }}><Trash2 size={18} /></button>
+                      <button className="action-icon" style={{ background: 'none', padding: 0 }} onClick={async () => {
+                        if (confirm('Deseja realmente excluir este paciente?')) {
+                          const { error } = await supabase.from('pacientes').delete().eq('id', patient.id);
+                          if (error) alert('Erro ao excluir paciente');
+                          else window.location.reload();
+                        }
+                      }}><Trash2 size={18} /></button>
                     </div>
                   </td>
                 </tr>

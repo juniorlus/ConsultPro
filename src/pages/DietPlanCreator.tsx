@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Plus, Trash2, Save, Loader2, Clock, Sparkles, Wand2, FileText } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Save, Loader2, Clock, Sparkles, FileText } from 'lucide-react';
 import { generateDietPlanPDF } from '../lib/pdfGenerator';
 
 interface MealItem {
@@ -90,7 +90,7 @@ const DietPlanCreator: React.FC = () => {
     // Simulação de chamada para IA (pode ser substituída por OpenAI/Gemini API)
     setTimeout(() => {
       const isHypertrophy = patient.objetivos?.includes('Ganhar massa');
-      const isWeightLoss = patient.objetivos?.includes('Emagrecer');
+      
       const hasGlutenRestriction = patient.restricoes_alimentares?.includes('Glúten');
       
       const suggestedMeals: Meal[] = [
