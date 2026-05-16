@@ -54,26 +54,63 @@ const DietPlanCreator: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/gerar-plano', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ patientData: patient }),
-      });
+      let response;
+      let data;
 
-      if (!response.ok) {
-        const errData = await response.json();
-        // Se der 404 localmente, avisa sobre o vercel dev
-        if (response.status === 404) {
-          throw new Error('Servidor de API não encontrado. No ambiente local, use "vercel dev" para rodar o projeto com suporte a funções /api.');
+      try {
+        response = await fetch('/api/gerar-plano', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ patientData: patient }),
+        });
+
+        if (response.ok) {
+          data = await response.json();
         }
-        throw new Error(errData.error || 'Falha ao gerar plano');
+      } catch (e) {
+        console.warn('API /api/gerar-plano não disponível. Tentando fallback local...');
       }
 
-      const data = await response.json();
+      // Fallback para o utilitário frontend se a API falhar (comum em ambiente local sem Vercel CLI)
+      if (!data) {
+        const prompt = `
+Você é um nutricionista profissional.
 
-      if (data.plano_semanal) {
+Gere um plano alimentar semanal com base nos dados abaixo.
+
+⚠️ Regras:
+- Responda APENAS em JSON válido
+- Não use markdown ou explicações fora do JSON
+- Respeite restrições e alergias
+- Para CADA refeição, você DEVE fornecer EXATAMENTE 5 opções de alimentos/combinações variadas
+
+Dados do paciente:
+${JSON.stringify(patient, null, 2)}
+
+Formato obrigatório:
+{
+  "plano_semanal": [
+    {
+      "dia": "Segunda-feira",
+      "refeicoes": {
+        "cafe_da_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "lanche_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "almoco": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "lanche_tarde": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "jantar": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"]
+      }
+    }
+  ]
+}
+`;
+        const responseText = await generateContent(prompt);
+        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        data = JSON.parse(cleanJson);
+      }
+
+      if (data && data.plano_semanal) {
         setWeeklyPlan(data.plano_semanal);
         setPlanName(`Plano Alimentar - ${patient.nome} - IA`);
       } else {
