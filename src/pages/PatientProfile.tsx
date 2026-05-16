@@ -2,9 +2,9 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  ArrowLeft, Save, Loader2, User, Activity, Plus, 
+  ArrowLeft, Loader2, User, Activity, Plus, 
   Calendar, FileText, ChevronRight, TrendingUp, Info, FileDown,
-  X, Coffee, Sun, Utensils, Moon, Sparkles
+  X, Sparkles, AlertCircle
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -41,7 +41,7 @@ const PatientProfile: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  // const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'pessoal' | 'clinico' | 'habitos'>('pessoal');
   const [showConsultationModal, setShowConsultationModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
@@ -100,10 +100,10 @@ const PatientProfile: React.FC = () => {
     }
   };
 
-  const hasChanges = useMemo(() => {
-    if (!patient || !formData) return false;
-    return JSON.stringify(patient) !== JSON.stringify(formData);
-  }, [patient, formData]);
+  // const hasChanges = useMemo(() => {
+  //   if (!patient || !formData) return false;
+  //   return JSON.stringify(patient) !== JSON.stringify(formData);
+  // }, [patient, formData]);
 
   const age = useMemo(() => {
     if (!formData?.data_nascimento) return null;
@@ -165,20 +165,20 @@ const PatientProfile: React.FC = () => {
     }));
   };
 
-  const handleSavePatient = async () => {
-    setIsSaving(true);
-    try {
-      const { error } = await supabase.from('pacientes').update(formData).eq('id', id);
-      if (error) throw error;
-      setPatient(formData);
-      alert('Alterações salvas com sucesso!');
-    } catch (error) {
-      console.error('Error saving patient:', error);
-      alert('Erro ao salvar alterações.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  // const handleSavePatient = async () => {
+  //   setIsSaving(true);
+  //   try {
+  //     const { error } = await supabase.from('pacientes').update(formData).eq('id', id);
+  //     if (error) throw error;
+  //     setPatient(formData);
+  //     alert('Alterações salvas com sucesso!');
+  //   } catch (error) {
+  //     console.error('Error saving patient:', error);
+  //     alert('Erro ao salvar alterações.');
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
 
   const handleSaveConsultation = async (e: React.FormEvent) => {
     e.preventDefault();

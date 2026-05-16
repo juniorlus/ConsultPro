@@ -22,7 +22,6 @@ export const generateDietPlanPDF = (data: PDFData) => {
   const doc = new jsPDF();
   
   const primaryColor = [0, 31, 63];
-  const accentColor = [16, 185, 129];
   
   // Header
   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { generateContent } from '../lib/gemini';
 import { 
   ArrowLeft, Save, Loader2, Sparkles, 
-  Calendar, Coffee, Sun, Utensils, Moon, CheckCircle2, AlertCircle
+  Coffee, Sun, Utensils, Moon, CheckCircle2, AlertCircle
 } from 'lucide-react';
 
 interface DietPlanDay {
