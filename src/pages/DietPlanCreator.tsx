@@ -54,42 +54,24 @@ const DietPlanCreator: React.FC = () => {
     setError(null);
     
     try {
-      const prompt = `
-Você é um nutricionista profissional.
+      const response = await fetch('/api/gerar-plano', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ patientData: patient }),
+      });
 
-Gere um plano alimentar semanal com base nos dados abaixo.
-
-⚠️ Regras:
-- Responda APENAS em JSON válido
-- Não use markdown ou explicações fora do JSON
-- Respeite restrições e alergias
-- Para CADA refeição, você DEVE fornecer EXATAMENTE 5 opções de alimentos/combinações variadas
-
-Dados do paciente:
-${JSON.stringify(patient, null, 2)}
-
-Formato obrigatório:
-{
-  "plano_semanal": [
-    {
-      "dia": "Segunda-feira",
-      "refeicoes": {
-        "cafe_da_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
-        "lanche_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
-        "almoco": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
-        "lanche_tarde": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
-        "jantar": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"]
+      if (!response.ok) {
+        const errData = await response.json();
+        // Se der 404 localmente, avisa sobre o vercel dev
+        if (response.status === 404) {
+          throw new Error('Servidor de API não encontrado. No ambiente local, use "vercel dev" para rodar o projeto com suporte a funções /api.');
+        }
+        throw new Error(errData.error || 'Falha ao gerar plano');
       }
-    }
-  ]
-}
-`;
 
-      const responseText = await generateContent(prompt);
-      
-      // Limpar blocos de código Markdown se existirem
-      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      const data = JSON.parse(cleanJson);
+      const data = await response.json();
 
       if (data.plano_semanal) {
         setWeeklyPlan(data.plano_semanal);
