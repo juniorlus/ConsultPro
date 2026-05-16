@@ -40,6 +40,7 @@ const PatientProfile: React.FC = () => {
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'pessoal' | 'clinico' | 'habitos'>('pessoal');
   const [showConsultationModal, setShowConsultationModal] = useState(false);
@@ -67,13 +68,25 @@ const PatientProfile: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const [patientRes, consultRes, plansRes] = await Promise.all([
         supabase.from('pacientes').select('*').eq('id', id).single(),
         supabase.from('consultas').select('*').eq('paciente_id', id).order('data_consulta', { ascending: true }),
         supabase.from('planos_alimentares').select('*').eq('paciente_id', id).order('created_at', { ascending: false })
       ]);
 
-      if (patientRes.error) throw patientRes.error;
+      if (patientRes.error) {
+        console.error('Error fetching data:', patientRes.error);
+        setError('Ocorreu um erro ao carregar os dados do paciente.');
+        setLoading(false);
+        return;
+      }
+
+      if (!patientRes.data) {
+        setError('Paciente não encontrado ou ID inválido.');
+        setLoading(false);
+        return;
+      }
       
       setPatient(patientRes.data);
       setFormData(patientRes.data);
@@ -81,6 +94,7 @@ const PatientProfile: React.FC = () => {
       setDietPlans(plansRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setError('Ocorreu um erro inesperado.');
     } finally {
       setLoading(false);
     }
@@ -202,6 +216,25 @@ const PatientProfile: React.FC = () => {
   };
 
   if (loading) return <div className="loading-container"><Loader2 className="animate-spin" size={48} /> Carregando perfil...</div>;
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Ops! Algo deu errado</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button 
+            onClick={() => navigate('/pacientes')}
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-bold"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para Lista de Pacientes
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="patient-profile-page">
