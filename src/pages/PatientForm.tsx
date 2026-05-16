@@ -149,7 +149,7 @@ const PatientForm: React.FC = () => {
         ...formData,
         nutricionista_id: user?.id,
         peso_inicial: formData.peso_inicial ? parseFloat(formData.peso_inicial) : null,
-        altura: heightInMeters,
+        altura: heightInMeters || null,
         litros_agua: formData.litros_agua ? parseFloat(formData.litros_agua) : null,
         refeicoes_por_dia: parseInt(formData.refeicoes_por_dia.toString()),
       };
@@ -164,11 +164,11 @@ const PatientForm: React.FC = () => {
       if (result.error) throw result.error;
 
       const savedId = result.data?.[0]?.id;
-      alert(isEditing ? 'Paciente atualizado com sucesso!' : 'Paciente cadastrado com sucesso!');
+      // Navegar primeiro para evitar tela em branco causada pelo alert() bloqueante
       navigate(`/pacientes/${savedId || id}`);
     } catch (error) {
       console.error('Error saving patient:', error);
-      alert('Erro ao salvar paciente.');
+      alert('Erro ao salvar paciente. Verifique os dados e tente novamente.');
     } finally {
       setLoading(false);
     }

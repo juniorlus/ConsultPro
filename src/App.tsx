@@ -52,6 +52,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* Rotas específicas ANTES da rota genérica :id */}
             <Route 
               path="/pacientes/novo" 
               element={
@@ -69,14 +70,6 @@ function App() {
               } 
             />
             <Route 
-              path="/pacientes/:id" 
-              element={
-                <ProtectedRoute>
-                  <PatientProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
               path="/pacientes/:id/plano/novo" 
               element={
                 <ProtectedRoute>
@@ -84,7 +77,17 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* Rota genérica por último */}
+            <Route 
+              path="/pacientes/:id" 
+              element={
+                <ProtectedRoute>
+                  <PatientProfile />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/" element={<Navigate to="/dashboard" />} />
+
           </Routes>
         </Router>
       </AuthProvider>
