@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { generateContent } from '../lib/gemini';
 import { 
   ArrowLeft, Save, Loader2, Sparkles, 
   Calendar, Coffee, Sun, Utensils, Moon, CheckCircle2, AlertCircle
@@ -53,20 +54,40 @@ const DietPlanCreator: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/gerar-plano', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ patientData: patient }),
-      });
+      const prompt = `
+Você é um nutricionista profissional.
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Falha ao gerar plano');
+Gere um plano alimentar semanal com base nos dados abaixo.
+
+⚠️ Regras:
+- Responda APENAS em JSON válido
+- Não use markdown ou explicações fora do JSON
+- Respeite restrições e alergias
+- Para CADA refeição, você DEVE fornecer EXATAMENTE 5 opções de alimentos/combinações variadas
+
+Dados do paciente:
+${JSON.stringify(patient, null, 2)}
+
+Formato obrigatório:
+{
+  "plano_semanal": [
+    {
+      "dia": "Segunda-feira",
+      "refeicoes": {
+        "cafe_da_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "lanche_manha": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "almoco": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "lanche_tarde": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"],
+        "jantar": ["opção 1", "opção 2", "opção 3", "opção 4", "opção 5"]
       }
+    }
+  ]
+}
+`;
 
-      const data = await response.json();
+      const responseText = await generateContent(prompt);
+      const data = JSON.parse(responseText);
+
       if (data.plano_semanal) {
         setWeeklyPlan(data.plano_semanal);
         setPlanName(`Plano Alimentar - ${patient.nome} - IA`);

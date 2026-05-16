@@ -29,9 +29,9 @@ Gere um plano alimentar semanal com base nos dados abaixo.
 
 ⚠️ Regras:
 - Responda APENAS em JSON válido
-- Não use markdown
-- Não escreva explicações
+- Não use markdown ou explicações fora do JSON
 - Respeite restrições e alergias
+- Para CADA refeição, você DEVE fornecer EXATAMENTE 5 opções de alimentos/combinações variadas
 
 Dados do paciente:
 ${JSON.stringify(patientData, null, 2)}
