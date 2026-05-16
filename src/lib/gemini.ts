@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(API_KEY || "");
 /**
  * Instância do modelo Gemini-2.0-flash (versão mais recente e veloz)
  */
-export const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export const geminiModel = genAI.getGenerativeModel({ model: "gemini-3.1-pro" });
 
 /**
  * Função utilitária para gerar texto de forma simplificada

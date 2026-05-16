@@ -86,7 +86,10 @@ Formato obrigatório:
 `;
 
       const responseText = await generateContent(prompt);
-      const data = JSON.parse(responseText);
+      
+      // Limpar blocos de código Markdown se existirem
+      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const data = JSON.parse(cleanJson);
 
       if (data.plano_semanal) {
         setWeeklyPlan(data.plano_semanal);
@@ -96,7 +99,15 @@ Formato obrigatório:
       }
     } catch (err: any) {
       console.error('Error generating with IA:', err);
-      setError(err.message || 'Erro ao conectar com a IA. Tente novamente.');
+      let userMessage = 'Erro ao conectar com a IA. Tente novamente.';
+      
+      if (err.message?.includes('quota')) {
+        userMessage = 'Limite de uso da IA atingido (Quota exceeded). Tente novamente mais tarde ou mude o modelo.';
+      } else if (err instanceof SyntaxError) {
+        userMessage = 'Erro ao processar a resposta da IA. Tente gerar novamente.';
+      }
+
+      setError(userMessage);
     } finally {
       setGeneratingIA(false);
     }

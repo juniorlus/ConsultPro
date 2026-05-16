@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro" });
 
   const prompt = `
 Você é um nutricionista profissional.
@@ -65,10 +65,9 @@ Regras:
     const response = await result.response;
     const text = response.text();
 
-    // Limpar markdown se a IA ignorar a regra
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
-    const dietPlan = JSON.parse(jsonString);
+    // Limpar blocos de código Markdown
+    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const dietPlan = JSON.parse(cleanJson);
 
     return res.status(200).json(dietPlan);
   } catch (error) {
