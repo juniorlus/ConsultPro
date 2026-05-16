@@ -76,7 +76,7 @@ const PatientForm: React.FC = () => {
 
   const age = useMemo(() => {
     if (!formData.data_nascimento) return null;
-    const birthDate = new Date(formData.data_nascimento);
+    const birthDate = new Date(formData.data_nascimento + 'T12:00:00');
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();

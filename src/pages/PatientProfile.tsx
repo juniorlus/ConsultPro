@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
   ArrowLeft, Save, Loader2, User, Activity, Plus, 
-  Calendar, FileText, ChevronRight, TrendingUp, Info, FileDown
+  Calendar, FileText, ChevronRight, TrendingUp, Info, FileDown,
+  X, Coffee, Sun, Utensils, Moon, Sparkles
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -23,6 +24,17 @@ interface Consultation {
   proximo_retorno: string | null;
 }
 
+interface DietPlanDay {
+  dia: string;
+  refeicoes: {
+    cafe_da_manha: string[];
+    lanche_manha: string[];
+    almoco: string[];
+    lanche_tarde: string[];
+    jantar: string[];
+  };
+}
+
 const PatientProfile: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,6 +43,7 @@ const PatientProfile: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'pessoal' | 'clinico' | 'habitos'>('pessoal');
   const [showConsultationModal, setShowConsultationModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   
   const [patient, setPatient] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
@@ -80,7 +93,7 @@ const PatientProfile: React.FC = () => {
 
   const age = useMemo(() => {
     if (!formData?.data_nascimento) return null;
-    const birthDate = new Date(formData.data_nascimento);
+    const birthDate = new Date(formData.data_nascimento + 'T12:00:00');
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();
@@ -90,7 +103,7 @@ const PatientProfile: React.FC = () => {
 
   const chartData = useMemo(() => {
     return consultations.map(c => ({
-      data: new Date(c.data_consulta).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      data: new Date(c.data_consulta + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
       peso: c.peso
     }));
   }, [consultations]);
@@ -98,7 +111,6 @@ const PatientProfile: React.FC = () => {
   const getRadarData = () => {
     const isHypertrophy = patient.objetivos?.includes('Ganhar massa');
     
-    // Valores ideais fictícios baseados no objetivo
     return [
       { subject: 'Proteínas', A: isHypertrophy ? 95 : 80, B: 70, fullMark: 100 },
       { subject: 'Carbos', A: isHypertrophy ? 90 : 60, B: 75, fullMark: 100 },
@@ -193,7 +205,6 @@ const PatientProfile: React.FC = () => {
 
   return (
     <div className="patient-profile-page">
-      {/* Header */}
       <div className="page-header-actions" style={{ justifyContent: 'flex-start', gap: '16px', marginBottom: '40px' }}>
         <button className="btn btn-secondary" onClick={() => navigate('/pacientes')}>
           <ArrowLeft size={20} />
@@ -208,10 +219,7 @@ const PatientProfile: React.FC = () => {
       </div>
 
       <div className="profile-grid">
-        {/* Left Column */}
         <div className="main-column" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          
-          {/* Section 1: Dados do Paciente */}
           <section className="section-card">
             <div className="section-title">
               <User size={24} color="var(--accent-color)" />
@@ -271,7 +279,6 @@ const PatientProfile: React.FC = () => {
                       <input type="number" step="0.01" name="altura" value={formData.altura || ''} onChange={handleInputChange} />
                     </div>
                   </div>
-                  
                   <div className="form-row">
                     <label>Objetivos</label>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -283,7 +290,6 @@ const PatientProfile: React.FC = () => {
                       ))}
                     </div>
                   </div>
-
                   <div className="form-row">
                     <label>Patologias / Condições</label>
                     <textarea name="medicamentos" value={formData.medicamentos || ''} onChange={handleInputChange} placeholder="Medicamentos, suplementos, patologias..." style={{ minHeight: '120px' }} />
@@ -318,7 +324,6 @@ const PatientProfile: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2: Consultas */}
           <section className="section-card">
             <div className="section-title" style={{ justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -330,7 +335,6 @@ const PatientProfile: React.FC = () => {
               </button>
             </div>
 
-            {/* Gráfico */}
             <div className="chart-container">
               {consultations.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -359,7 +363,6 @@ const PatientProfile: React.FC = () => {
               )}
             </div>
 
-            {/* Lista de Consultas */}
             <div className="consultation-list">
               <div className="consultation-item consultation-header">
                 <div>Data</div>
@@ -371,7 +374,7 @@ const PatientProfile: React.FC = () => {
               </div>
               {[...consultations].reverse().map(c => (
                 <div key={c.id} className="consultation-item">
-                  <div style={{ fontWeight: 600 }}>{new Date(c.data_consulta).toLocaleDateString('pt-BR')}</div>
+                  <div style={{ fontWeight: 600 }}>{new Date(c.data_consulta + 'T12:00:00').toLocaleDateString('pt-BR')}</div>
                   <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{c.peso} kg</div>
                   <div>{c.cintura ? `${c.cintura} cm` : '--'}</div>
                   <div>{c.quadril ? `${c.quadril} cm` : '--'}</div>
@@ -388,7 +391,6 @@ const PatientProfile: React.FC = () => {
           </section>
         </div>
 
-        {/* Right Column */}
         <div className="side-column">
           <section className="section-card">
             <div className="section-title">
@@ -398,15 +400,24 @@ const PatientProfile: React.FC = () => {
 
             <button 
               className="btn btn-primary" 
-              style={{ width: '100%', marginBottom: '24px', justifyContent: 'center', height: '56px', fontSize: '1.1rem' }}
+              style={{ 
+                width: '100%', 
+                marginBottom: '24px', 
+                justifyContent: 'center', 
+                height: '56px', 
+                fontSize: '1.1rem',
+                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)'
+              }}
               onClick={() => navigate(`/pacientes/${id}/plano/novo`)}
             >
-              Gerar Plano Alimentar
+              <Sparkles size={20} />
+              Gerar Plano com IA
             </button>
 
             <div className="history-list">
               {dietPlans.length > 0 ? dietPlans.map(plan => (
-                <div key={plan.id} className="history-item">
+                <div key={plan.id} className="history-item" onClick={() => setSelectedPlan(plan)} style={{ cursor: 'pointer' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ color: 'var(--accent-color)' }}><Calendar size={20} /></div>
                     <div>
@@ -440,7 +451,6 @@ const PatientProfile: React.FC = () => {
             </div>
           </section>
 
-          {/* Radar Chart Section */}
           <section className="section-card" style={{ marginTop: '24px' }}>
             <div className="section-title">
               <TrendingUp size={24} color="var(--accent-color)" />
@@ -452,68 +462,82 @@ const PatientProfile: React.FC = () => {
                   <PolarGrid stroke="var(--border-color)" />
                   <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar
-                    name="Ideal"
-                    dataKey="A"
-                    stroke="var(--accent-color)"
-                    fill="var(--accent-color)"
-                    fillOpacity={0.6}
-                  />
-                  <Radar
-                    name="Atual"
-                    dataKey="B"
-                    stroke="var(--primary-color)"
-                    fill="var(--primary-color)"
-                    fillOpacity={0.4}
-                  />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
-                    itemStyle={{ fontSize: '12px' }}
-                  />
+                  <Radar name="Ideal" dataKey="A" stroke="var(--accent-color)" fill="var(--accent-color)" fillOpacity={0.6} />
+                  <Radar name="Atual" dataKey="B" stroke="var(--primary-color)" fill="var(--primary-color)" fillOpacity={0.4} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px' }} itemStyle={{ fontSize: '12px' }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '12px', height: '12px', background: 'var(--accent-color)', borderRadius: '2px', opacity: 0.6 }}></div> Ideal
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '12px', height: '12px', background: 'var(--primary-color)', borderRadius: '2px', opacity: 0.4 }}></div> Atual
-              </div>
-            </div>
           </section>
-
-          {/* Quick Stats Summary */}
-          <div className="section-card" style={{ marginTop: '24px', background: 'linear-gradient(135deg, #001f3f 0%, #003366 100%)', color: 'white' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ opacity: 0.8 }}>Peso Atual</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>{consultations.length > 0 ? consultations[consultations.length-1].peso : patient.peso_inicial} kg</span>
-              </div>
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ opacity: 0.8 }}>Próximo Retorno</span>
-                <span style={{ fontWeight: 600 }}>{consultations.find(c => c.proximo_retorno)?.proximo_retorno ? new Date(consultations.find(c => c.proximo_retorno)!.proximo_retorno!).toLocaleDateString('pt-BR') : '--'}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Floating Save Bar */}
-      {hasChanges && (
-        <div className="save-bar">
-          <button className="btn btn-primary" onClick={handleSavePatient} disabled={isSaving} style={{ boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)', backgroundColor: 'var(--accent-color)', padding: '16px 32px' }}>
-            {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-            Salvar alterações
-          </button>
+      {selectedPlan && (
+        <div className="modal-overlay" onClick={() => setSelectedPlan(null)}>
+          <div className="modal-content" style={{ maxWidth: '900px', width: '95%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{selectedPlan.nome_plano}</h2>
+                <p style={{ color: 'var(--text-muted)' }}>Gerado em {new Date(selectedPlan.created_at).toLocaleDateString('pt-BR')}</p>
+              </div>
+              <button className="action-icon" onClick={() => setSelectedPlan(null)}><X size={24} /></button>
+            </div>
+
+            <div className="plan-viewer-content" style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '10px' }}>
+              {Array.isArray(selectedPlan.refeicoes) && selectedPlan.refeicoes[0]?.dia ? (
+                // Novo formato (Plano Semanal)
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                  {selectedPlan.refeicoes.map((day: DietPlanDay) => (
+                    <div key={day.dia}>
+                      <h3 style={{ borderBottom: '2px solid var(--accent-light)', paddingBottom: '8px', marginBottom: '16px', color: 'var(--primary-color)' }}>{day.dia}</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                        {Object.entries(day.refeicoes).map(([key, options]) => (
+                          <div key={key} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontWeight: 700, marginBottom: '12px', fontSize: '0.9rem', color: 'var(--accent-color)', textTransform: 'capitalize' }}>
+                              {key.replace(/_/g, ' ')}
+                            </div>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              {options.filter(o => o).map((opt, i) => (
+                                <li key={i} style={{ fontSize: '0.85rem', color: 'var(--text-muted)', borderLeft: '2px solid var(--accent-light)', paddingLeft: '8px' }}>{opt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // Formato antigo (Legado)
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+                  {Array.isArray(selectedPlan.refeicoes) && selectedPlan.refeicoes.map((meal: any, idx: number) => (
+                    <div key={idx} style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+                      <h4 style={{ fontWeight: 700, marginBottom: '4px' }}>{meal.nome}</h4>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>{meal.horario}</p>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {meal.itens.map((item: any, i: number) => (
+                          <li key={i} style={{ fontSize: '0.9rem', marginBottom: '4px' }}>• {item.alimento} ({item.quantidade})</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button className="btn btn-secondary" onClick={() => generateDietPlanPDF({ patientName: patient.nome, planName: selectedPlan.nome_plano, meals: selectedPlan.refeicoes })}>
+                <FileDown size={18} /> Baixar PDF
+              </button>
+              <button className="btn btn-primary" onClick={() => setSelectedPlan(null)}>Fechar</button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Modal Nova Consulta */}
       {showConsultationModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={() => setShowConsultationModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h2 className="section-title">Registrar Nova Consulta</h2>
             <form onSubmit={handleSaveConsultation}>
               <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -546,7 +570,6 @@ const PatientProfile: React.FC = () => {
                 <label>Observações</label>
                 <textarea value={newConsultation.observacoes} onChange={e => setNewConsultation({...newConsultation, observacoes: e.target.value})} placeholder="Evolução, dificuldades, novas metas..." style={{ minHeight: '80px' }} />
               </div>
-              
               <div className="form-actions" style={{ marginTop: '32px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowConsultationModal(false)}>Cancelar</button>
                 <button type="submit" className="btn btn-primary" style={{ backgroundColor: 'var(--accent-color)' }}>Salvar consulta</button>

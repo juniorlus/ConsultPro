@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Plus, Trash2, Save, Loader2, Clock, Sparkles, FileText } from 'lucide-react';
-import { generateDietPlanPDF } from '../lib/pdfGenerator';
+import { 
+  ArrowLeft, Save, Loader2, Sparkles, 
+  Calendar, Coffee, Sun, Utensils, Moon, CheckCircle2, AlertCircle
+} from 'lucide-react';
 
-interface MealItem {
-  id: string;
-  alimento: string;
-  quantidade: string;
-}
-
-interface Meal {
-  id: string;
-  nome: string;
-  horario: string;
-  itens: MealItem[];
+interface DietPlanDay {
+  dia: string;
+  refeicoes: {
+    cafe_da_manha: string[];
+    lanche_manha: string[];
+    almoco: string[];
+    lanche_tarde: string[];
+    jantar: string[];
+  };
 }
 
 const DietPlanCreator: React.FC = () => {
@@ -24,272 +24,281 @@ const DietPlanCreator: React.FC = () => {
   const { user } = useAuth();
 
   const [planName, setPlanName] = useState('Novo Plano Alimentar');
-  const [meals, setMeals] = useState<Meal[]>([
-    {
-      id: crypto.randomUUID(),
-      nome: 'Café da Manhã',
-      horario: '08:00',
-      itens: [{ id: crypto.randomUUID(), alimento: '', quantidade: '' }]
-    }
-  ]);
+  const [weeklyPlan, setWeeklyPlan] = useState<DietPlanDay[]>([]);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+  
   const [loading, setLoading] = useState(false);
   const [generatingIA, setGeneratingIA] = useState(false);
   const [patient, setPatient] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPatientData();
   }, [patientId]);
 
   const fetchPatientData = async () => {
-    const { data } = await supabase.from('pacientes').select('*').eq('id', patientId).single();
-    if (data) setPatient(data);
-  };
-
-  const addMeal = () => {
-    setMeals([...meals, {
-      id: crypto.randomUUID(),
-      nome: 'Nova Refeição',
-      horario: '12:00',
-      itens: [{ id: crypto.randomUUID(), alimento: '', quantidade: '' }]
-    }]);
-  };
-
-  const removeMeal = (mealId: string) => {
-    setMeals(meals.filter(m => m.id !== mealId));
-  };
-
-  const updateMeal = (mealId: string, field: keyof Meal, value: string) => {
-    setMeals(meals.map(m => m.id === mealId ? { ...m, [field]: value } : m));
-  };
-
-  const addMealItem = (mealId: string) => {
-    setMeals(meals.map(m => m.id === mealId ? {
-      ...m,
-      itens: [...m.itens, { id: crypto.randomUUID(), alimento: '', quantidade: '' }]
-    } : m));
-  };
-
-  const updateMealItem = (mealId: string, itemId: string, field: keyof MealItem, value: string) => {
-    setMeals(meals.map(m => m.id === mealId ? {
-      ...m,
-      itens: m.itens.map(i => i.id === itemId ? { ...i, [field]: value } : i)
-    } : m));
-  };
-
-  const removeMealItem = (mealId: string, itemId: string) => {
-    setMeals(meals.map(m => m.id === mealId ? {
-      ...m,
-      itens: m.itens.filter(i => i.id !== itemId)
-    } : m));
+    try {
+      const { data, error } = await supabase.from('pacientes').select('*').eq('id', patientId).single();
+      if (error) throw error;
+      if (data) setPatient(data);
+    } catch (err) {
+      console.error('Error fetching patient:', err);
+      setError('Erro ao carregar dados do paciente.');
+    }
   };
 
   const generateWithIA = async () => {
     if (!patient) return;
     setGeneratingIA(true);
+    setError(null);
     
-    // Simulação de chamada para IA (pode ser substituída por OpenAI/Gemini API)
-    setTimeout(() => {
-      const isHypertrophy = patient.objetivos?.includes('Ganhar massa');
-      
-      const hasGlutenRestriction = patient.restricoes_alimentares?.includes('Glúten');
-      
-      const suggestedMeals: Meal[] = [
-        {
-          id: crypto.randomUUID(),
-          nome: 'Café da Manhã',
-          horario: '07:30',
-          itens: [
-            { id: crypto.randomUUID(), alimento: hasGlutenRestriction ? 'Pão de forma sem glúten' : 'Pão integral', quantidade: '2 fatias' },
-            { id: crypto.randomUUID(), alimento: 'Ovos mexidos', quantidade: '2 unidades' },
-            { id: crypto.randomUUID(), alimento: 'Fruta (Mamão ou Banana)', quantidade: '1 porção' }
-          ]
+    try {
+      const response = await fetch('/api/gerar-plano', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: crypto.randomUUID(),
-          nome: 'Lanche da Manhã',
-          horario: '10:30',
-          itens: [
-            { id: crypto.randomUUID(), alimento: 'Iogurte natural', quantidade: '1 pote' },
-            { id: crypto.randomUUID(), alimento: 'Mix de castanhas', quantidade: '20g' }
-          ]
-        },
-        {
-          id: crypto.randomUUID(),
-          nome: 'Almoço',
-          horario: '12:30',
-          itens: [
-            { id: crypto.randomUUID(), alimento: 'Arroz integral ou Batata doce', quantidade: isHypertrophy ? '150g' : '100g' },
-            { id: crypto.randomUUID(), alimento: 'Peito de frango grelhado', quantidade: '120g' },
-            { id: crypto.randomUUID(), alimento: 'Feijão preto/carioca', quantidade: '1 concha média' },
-            { id: crypto.randomUUID(), alimento: 'Salada de folhas verdes à vontade', quantidade: 'Livre' }
-          ]
-        },
-        {
-          id: crypto.randomUUID(),
-          nome: 'Lanche da Tarde',
-          horario: '16:00',
-          itens: [
-            { id: crypto.randomUUID(), alimento: 'Fruta com aveia', quantidade: '1 unidade' },
-            { id: crypto.randomUUID(), alimento: 'Whey Protein (opcional)', quantidade: '1 scoop' }
-          ]
-        },
-        {
-          id: crypto.randomUUID(),
-          nome: 'Jantar',
-          horario: '19:30',
-          itens: [
-            { id: crypto.randomUUID(), alimento: 'Proteína (Peixe ou Frango)', quantidade: '100g' },
-            { id: crypto.randomUUID(), alimento: 'Legumes cozidos (Brócolis, Cenoura)', quantidade: '150g' }
-          ]
-        }
-      ];
+        body: JSON.stringify({ patientData: patient }),
+      });
 
-      setMeals(suggestedMeals);
-      setPlanName(`Plano Alimentar - ${patient.objetivos?.[0] || 'Personalizado'}`);
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Falha ao gerar plano');
+      }
+
+      const data = await response.json();
+      if (data.plano_semanal) {
+        setWeeklyPlan(data.plano_semanal);
+        setPlanName(`Plano Alimentar - ${patient.nome} - IA`);
+      } else {
+        throw new Error('Formato de resposta inválido da IA');
+      }
+    } catch (err: any) {
+      console.error('Error generating with IA:', err);
+      setError(err.message || 'Erro ao conectar com a IA. Tente novamente.');
+    } finally {
       setGeneratingIA(false);
-      alert('Plano gerado com sucesso pela IA! Você pode fazer ajustes agora.');
-    }, 2000);
+    }
   };
 
-  const handleExportPDF = () => {
-    if (!patient) return;
-    generateDietPlanPDF({
-      patientName: patient.nome,
-      planName: planName,
-      meals: meals
-    });
+  const handleOptionChange = (dayIndex: number, mealKey: keyof DietPlanDay['refeicoes'], optionIndex: number, newValue: string) => {
+    const updatedPlan = [...weeklyPlan];
+    updatedPlan[dayIndex].refeicoes[mealKey][optionIndex] = newValue;
+    setWeeklyPlan(updatedPlan);
   };
 
-  const handleSave = async (exportPdf = false) => {
-    if (!user) return;
+  const handleSave = async () => {
+    if (!user || weeklyPlan.length === 0) return;
     setLoading(true);
+    setError(null);
 
     try {
       const { error } = await supabase.from('planos_alimentares').insert([{
         paciente_id: patientId,
         nome_plano: planName,
-        refeicoes: meals,
+        refeicoes: weeklyPlan, // Salvando o JSON completo
         created_at: new Date().toISOString()
       }]);
 
       if (error) throw error;
       
-      if (exportPdf) {
-        handleExportPDF();
-      }
-      
       alert('Plano alimentar salvo com sucesso!');
       navigate(`/pacientes/${patientId}`);
-    } catch (error) {
-      console.error('Error saving diet plan:', error);
-      alert('Erro ao salvar plano alimentar.');
+    } catch (err: any) {
+      console.error('Error saving diet plan:', err);
+      setError('Erro ao salvar plano alimentar no banco de dados.');
     } finally {
       setLoading(false);
     }
   };
 
+  const activeDay = weeklyPlan[activeDayIndex];
+
   return (
     <div className="diet-creator-page">
-      <div className="page-header-actions" style={{ justifyContent: 'flex-start', gap: '16px' }}>
+      <div className="page-header-actions" style={{ justifyContent: 'flex-start', gap: '16px', marginBottom: '32px' }}>
         <button className="btn btn-secondary" onClick={() => navigate(`/pacientes/${patientId}`)}>
           <ArrowLeft size={20} />
           Voltar
         </button>
         <div>
-          <h1 style={{ color: 'var(--primary-color)', fontSize: '1.5rem' }}>Criar Plano Alimentar</h1>
-          <p style={{ color: '#64748b' }}>Paciente: <strong>{patient?.nome}</strong></p>
+          <h1 style={{ color: 'var(--primary-color)', fontSize: '1.8rem', fontWeight: 800 }}>Plano Alimentar Inteligente</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Paciente: <strong style={{ color: 'var(--primary-color)' }}>{patient?.nome}</strong></p>
         </div>
-        <button 
-          className="btn btn-primary" 
-          style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)', boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)' }}
-          onClick={generateWithIA}
-          disabled={generatingIA}
-        >
-          {generatingIA ? <Loader2 className="animate-spin" /> : <Sparkles size={18} />}
-          {generatingIA ? 'A IA está pensando...' : 'Gerar com IA'}
-        </button>
+        
+        {!weeklyPlan.length && (
+          <button 
+            className="btn btn-primary" 
+            style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '12px 24px', fontSize: '1.1rem' }}
+            onClick={generateWithIA}
+            disabled={generatingIA}
+          >
+            {generatingIA ? <Loader2 className="animate-spin" /> : <Sparkles size={20} />}
+            {generatingIA ? 'IA Gerando Plano...' : 'Gerar com IA'}
+          </button>
+        )}
       </div>
 
-      <div className="form-card" style={{ marginBottom: '32px' }}>
-        <div className="form-row">
-          <label>Nome do Plano</label>
-          <input 
-            value={planName} 
-            onChange={(e) => setPlanName(e.target.value)} 
-            style={{ fontSize: '1.2rem', fontWeight: 700 }}
-          />
+      {error && (
+        <div className="alert alert-danger" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+          <AlertCircle size={20} />
+          {error}
         </div>
-      </div>
+      )}
 
-      <div className="meals-container">
-        {meals.map((meal) => (
-          <div key={meal.id} className="meal-card">
-            <div className="meal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <input 
-                  className="meal-title-input"
-                  value={meal.nome}
-                  onChange={(e) => updateMeal(meal.id, 'nome', e.target.value)}
-                />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                  <Clock size={16} />
-                  <input 
-                    type="time" 
-                    value={meal.horario}
-                    onChange={(e) => updateMeal(meal.id, 'horario', e.target.value)}
-                    style={{ border: 'none', background: 'none', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}
-                  />
-                </div>
-              </div>
-              <button className="action-icon" onClick={() => removeMeal(meal.id)} title="Remover Refeição">
-                <Trash2 size={20} />
+      {!weeklyPlan.length && !generatingIA && (
+        <div className="empty-state-card" style={{ textAlign: 'center', padding: '60px', background: 'var(--card-bg)', borderRadius: '24px', border: '2px dashed var(--border-color)' }}>
+          <Sparkles size={48} color="var(--accent-color)" style={{ marginBottom: '20px', opacity: 0.5 }} />
+          <h3>Nenhum plano gerado</h3>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 24px' }}>
+            Clique no botão acima para que a nossa inteligência artificial crie um plano personalizado baseado no perfil deste paciente.
+          </p>
+        </div>
+      )}
+
+      {generatingIA && (
+        <div className="loading-ia-state" style={{ textAlign: 'center', padding: '60px' }}>
+          <div className="ia-loader">
+            <div className="ia-dot"></div>
+            <div className="ia-dot"></div>
+            <div className="ia-dot"></div>
+          </div>
+          <h3 style={{ marginTop: '24px' }}>Criando Plano Personalizado...</h3>
+          <p style={{ color: 'var(--text-muted)' }}>Analisando objetivos, restrições e preferências do paciente.</p>
+        </div>
+      )}
+
+      {weeklyPlan.length > 0 && (
+        <div className="plan-editor-container">
+          <div className="form-card" style={{ marginBottom: '24px' }}>
+            <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', display: 'block' }}>Nome do Plano</label>
+            <input 
+              value={planName} 
+              onChange={(e) => setPlanName(e.target.value)} 
+              className="plan-name-input"
+              style={{ fontSize: '1.2rem', fontWeight: 700, width: '100%', border: 'none', background: 'var(--input-bg)', padding: '12px', borderRadius: '8px' }}
+            />
+          </div>
+
+          <div className="days-nav" style={{ display: 'flex', gap: '8px', marginBottom: '32px', overflowX: 'auto', paddingBottom: '8px' }}>
+            {weeklyPlan.map((day, idx) => (
+              <button 
+                key={day.dia} 
+                className={`day-nav-btn ${activeDayIndex === idx ? 'active' : ''}`}
+                onClick={() => setActiveDayIndex(idx)}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: activeDayIndex === idx ? 'var(--primary-color)' : 'var(--card-bg)',
+                  color: activeDayIndex === idx ? 'white' : 'var(--text-muted)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s',
+                  boxShadow: activeDayIndex === idx ? '0 4px 12px rgba(0, 31, 63, 0.2)' : 'none'
+                }}
+              >
+                {day.dia}
               </button>
-            </div>
+            ))}
+          </div>
 
-            <div className="meal-items">
-              {meal.itens.map((item) => (
-                <div key={item.id} className="item-row">
-                  <input 
-                    placeholder="Alimento" 
-                    value={item.alimento}
-                    onChange={(e) => updateMealItem(meal.id, item.id, 'alimento', e.target.value)}
-                  />
-                  <input 
-                    placeholder="Quantidade" 
-                    value={item.quantidade}
-                    onChange={(e) => updateMealItem(meal.id, item.id, 'quantidade', e.target.value)}
-                  />
-                  <button className="action-icon" onClick={() => removeMealItem(meal.id, item.id)}>
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-              <button className="btn btn-secondary" style={{ width: 'fit-content', marginTop: '8px' }} onClick={() => addMealItem(meal.id)}>
-                <Plus size={16} /> Item
+          <div className="meals-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
+            {/* Café da Manhã */}
+            <MealCard 
+              title="Café da Manhã" 
+              icon={<Coffee size={20} />} 
+              options={activeDay.refeicoes.cafe_da_manha} 
+              onOptionChange={(idx, val) => handleOptionChange(activeDayIndex, 'cafe_da_manha', idx, val)}
+            />
+
+            {/* Lanche da Manhã */}
+            <MealCard 
+              title="Lanche da Manhã" 
+              icon={<Sun size={20} />} 
+              options={activeDay.refeicoes.lanche_manha} 
+              onOptionChange={(idx, val) => handleOptionChange(activeDayIndex, 'lanche_manha', idx, val)}
+            />
+
+            {/* Almoço */}
+            <MealCard 
+              title="Almoço" 
+              icon={<Utensils size={20} />} 
+              options={activeDay.refeicoes.almoco} 
+              onOptionChange={(idx, val) => handleOptionChange(activeDayIndex, 'almoco', idx, val)}
+            />
+
+            {/* Lanche da Tarde */}
+            <MealCard 
+              title="Lanche da Tarde" 
+              icon={<Sun size={20} />} 
+              options={activeDay.refeicoes.lanche_tarde} 
+              onOptionChange={(idx, val) => handleOptionChange(activeDayIndex, 'lanche_tarde', idx, val)}
+            />
+
+            {/* Jantar */}
+            <MealCard 
+              title="Jantar" 
+              icon={<Moon size={20} />} 
+              options={activeDay.refeicoes.jantar} 
+              onOptionChange={(idx, val) => handleOptionChange(activeDayIndex, 'jantar', idx, val)}
+            />
+          </div>
+
+          <div className="sticky-actions-bar" style={{ position: 'sticky', bottom: '24px', marginTop: '40px', padding: '20px', background: 'var(--card-bg)', borderRadius: '16px', boxShadow: '0 -10px 25px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--accent-color)', fontWeight: 600 }}>
+              <CheckCircle2 size={24} />
+              Plano Gerado e Editável
+            </div>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button className="btn btn-secondary" onClick={() => setWeeklyPlan([])}>Descartar e Recomeçar</button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSave} 
+                disabled={loading} 
+                style={{ backgroundColor: 'var(--accent-color)', padding: '12px 32px' }}
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />}
+                Salvar Plano Completo
               </button>
             </div>
           </div>
-        ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
-        <button className="add-meal-btn" onClick={addMeal}>
-          <Plus size={24} /> Adicionar Nova Refeição
-        </button>
+interface MealCardProps {
+  title: string;
+  icon: React.ReactNode;
+  options: string[];
+  onOptionChange: (index: number, value: string) => void;
+}
+
+const MealCard: React.FC<MealCardProps> = ({ title, icon, options, onOptionChange }) => {
+  return (
+    <div className="meal-edit-card" style={{ background: 'var(--card-bg)', borderRadius: '20px', padding: '24px', boxShadow: 'var(--card-shadow)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-color)' }}>
+          {icon}
+        </div>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>{title}</h3>
       </div>
-
-      <div className="diet-summary-bar">
-        <div style={{ color: '#64748b' }}>
-          <strong>{meals.length}</strong> refeições configuradas
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={() => handleSave(true)} disabled={loading}>
-            <FileText size={20} />
-            Salvar e PDF
-          </button>
-          <button className="btn btn-primary" onClick={() => handleSave(false)} disabled={loading} style={{ backgroundColor: 'var(--accent-color)' }}>
-            {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-            Salvar Plano Alimentar
-          </button>
-        </div>
+      
+      <div className="options-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {options.map((opt, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', width: '20px' }}>{i + 1}</span>
+            <input 
+              value={opt} 
+              onChange={(e) => onOptionChange(i, e.target.value)}
+              placeholder={`Opção ${i + 1}...`}
+              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
